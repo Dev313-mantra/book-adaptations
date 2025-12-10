@@ -1,0 +1,53 @@
+import { NextResponse } from "next/server";
+import { prisma } from "@/lib/prisma";
+
+const adaptationsData = [
+  { author: { name: "Elin Hilderbrand", nationality: "American" }, book: { title: "The Perfect Couple", publicationYear: 2018, genre: "Mystery" }, adaptation: { title: "The Perfect Couple", type: "Limited Series", releaseYear: 2024, platform: "Netflix", status: "Released", imdbRating: 7.0, rtScore: 61 } },
+  { author: { name: "James Clavell", nationality: "British-American" }, book: { title: "Shōgun", publicationYear: 1975, genre: "Historical Fiction" }, adaptation: { title: "Shōgun", type: "Limited Series", releaseYear: 2024, platform: "FX/Hulu", status: "Released", imdbRating: 8.7, rtScore: 99 } },
+  { author: { name: "Peter Brown", nationality: "American" }, book: { title: "The Wild Robot", publicationYear: 2016, genre: "Children's Fiction" }, adaptation: { title: "The Wild Robot", type: "Film", releaseYear: 2024, platform: "Theatrical", status: "Released", imdbRating: 8.1, rtScore: 98 } },
+  { author: { name: "Colson Whitehead", nationality: "American" }, book: { title: "The Nickel Boys", publicationYear: 2019, genre: "Historical Fiction" }, adaptation: { title: "Nickel Boys", type: "Film", releaseYear: 2024, platform: "Theatrical", status: "Released", imdbRating: 7.2, rtScore: 96 } },
+  { author: { name: "Rachel Yoder", nationality: "American" }, book: { title: "Nightbitch", publicationYear: 2021, genre: "Horror" }, adaptation: { title: "Nightbitch", type: "Film", releaseYear: 2024, platform: "Theatrical", status: "Released", imdbRating: 6.0, rtScore: 77 } },
+  { author: { name: "Frank Herbert", nationality: "American" }, book: { title: "Dune", publicationYear: 1965, genre: "Science Fiction" }, adaptation: { title: "Dune: Part Two", type: "Film", releaseYear: 2024, platform: "Theatrical", status: "Released", imdbRating: 8.5, rtScore: 92 } },
+  { author: { name: "Robinne Lee", nationality: "American" }, book: { title: "The Idea of You", publicationYear: 2017, genre: "Romance" }, adaptation: { title: "The Idea of You", type: "Film", releaseYear: 2024, platform: "Prime Video", status: "Released", imdbRating: 6.4, rtScore: 82 } },
+  { author: { name: "David Nicholls", nationality: "British" }, book: { title: "One Day", publicationYear: 2009, genre: "Romance" }, adaptation: { title: "One Day", type: "TV Series", releaseYear: 2024, platform: "Netflix", status: "Released", imdbRating: 7.9, rtScore: 89 } },
+  { author: { name: "Liane Moriarty", nationality: "Australian" }, book: { title: "Apples Never Fall", publicationYear: 2021, genre: "Mystery" }, adaptation: { title: "Apples Never Fall", type: "Limited Series", releaseYear: 2024, platform: "Peacock", status: "Released", imdbRating: 7.2, rtScore: 68 } },
+  { author: { name: "Amor Towles", nationality: "American" }, book: { title: "A Gentleman in Moscow", publicationYear: 2016, genre: "Historical Fiction" }, adaptation: { title: "A Gentleman in Moscow", type: "Limited Series", releaseYear: 2024, platform: "Paramount+", status: "Released", imdbRating: 8.1, rtScore: 93 } },
+  { author: { name: "Lisa Taddeo", nationality: "American" }, book: { title: "Three Women", publicationYear: 2019, genre: "Non-Fiction" }, adaptation: { title: "Three Women", type: "TV Series", releaseYear: 2024, platform: "Starz", status: "Released", imdbRating: 6.5, rtScore: 60 } },
+  { author: { name: "John Green", nationality: "American" }, book: { title: "Turtles All the Way Down", publicationYear: 2017, genre: "Young Adult" }, adaptation: { title: "Turtles All the Way Down", type: "Film", releaseYear: 2024, platform: "Max", status: "Released", imdbRating: 6.5, rtScore: 74 } },
+  { author: { name: "Scott Turow", nationality: "American" }, book: { title: "Presumed Innocent", publicationYear: 1987, genre: "Legal Thriller" }, adaptation: { title: "Presumed Innocent", type: "TV Series", releaseYear: 2024, platform: "Apple TV+", status: "Released", imdbRating: 7.6, rtScore: 83 } },
+  { author: { name: "Colleen Hoover", nationality: "American" }, book: { title: "It Ends with Us", publicationYear: 2016, genre: "Romance" }, adaptation: { title: "It Ends with Us", type: "Film", releaseYear: 2024, platform: "Theatrical", status: "Released", imdbRating: 6.3, rtScore: 54 } },
+  { author: { name: "Judy Blume", nationality: "American" }, book: { title: "Are You There God? It's Me, Margaret", publicationYear: 1970, genre: "Young Adult" }, adaptation: { title: "Are You There God? It's Me, Margaret.", type: "Film", releaseYear: 2023, platform: "Theatrical", status: "Released", imdbRating: 7.4, rtScore: 99 } },
+  { author: { name: "Bonnie Garmus", nationality: "American" }, book: { title: "Lessons in Chemistry", publicationYear: 2022, genre: "Historical Fiction" }, adaptation: { title: "Lessons in Chemistry", type: "Limited Series", releaseYear: 2023, platform: "Apple TV+", status: "Released", imdbRating: 8.2, rtScore: 88 } },
+  { author: { name: "Casey McQuiston", nationality: "American" }, book: { title: "Red, White & Royal Blue", publicationYear: 2019, genre: "Romance" }, adaptation: { title: "Red, White & Royal Blue", type: "Film", releaseYear: 2023, platform: "Prime Video", status: "Released", imdbRating: 6.8, rtScore: 80 } },
+  { author: { name: "Taylor Jenkins Reid", nationality: "American" }, book: { title: "Daisy Jones & The Six", publicationYear: 2019, genre: "Historical Fiction" }, adaptation: { title: "Daisy Jones & The Six", type: "Limited Series", releaseYear: 2023, platform: "Prime Video", status: "Released", imdbRating: 8.1, rtScore: 73 } },
+  { author: { name: "Min Jin Lee", nationality: "Korean-American" }, book: { title: "Pachinko", publicationYear: 2017, genre: "Historical Fiction" }, adaptation: { title: "Pachinko", type: "TV Series", releaseYear: 2022, platform: "Apple TV+", status: "Released", imdbRating: 8.4, rtScore: 98 } },
+  { author: { name: "Delia Owens", nationality: "American" }, book: { title: "Where the Crawdads Sing", publicationYear: 2018, genre: "Mystery" }, adaptation: { title: "Where the Crawdads Sing", type: "Film", releaseYear: 2022, platform: "Theatrical", status: "Released", imdbRating: 7.1, rtScore: 35 } },
+  { author: { name: "Frank Herbert", nationality: "American" }, book: { title: "Dune", publicationYear: 1965, genre: "Science Fiction" }, adaptation: { title: "Dune", type: "Film", releaseYear: 2021, platform: "Theatrical", status: "Released", imdbRating: 8.0, rtScore: 83 } },
+  { author: { name: "Colson Whitehead", nationality: "American" }, book: { title: "The Underground Railroad", publicationYear: 2016, genre: "Historical Fiction" }, adaptation: { title: "The Underground Railroad", type: "Limited Series", releaseYear: 2021, platform: "Prime Video", status: "Released", imdbRating: 7.5, rtScore: 89 } },
+  { author: { name: "Leigh Bardugo", nationality: "American" }, book: { title: "Shadow and Bone", publicationYear: 2012, genre: "Fantasy" }, adaptation: { title: "Shadow and Bone", type: "TV Series", releaseYear: 2021, platform: "Netflix", status: "Released", imdbRating: 7.6, rtScore: 88 } },
+  { author: { name: "Walter Tevis", nationality: "American" }, book: { title: "The Queen's Gambit", publicationYear: 1983, genre: "Literary Fiction" }, adaptation: { title: "The Queen's Gambit", type: "Limited Series", releaseYear: 2020, platform: "Netflix", status: "Released", imdbRating: 8.5, rtScore: 96 } },
+  { author: { name: "Julia Quinn", nationality: "American" }, book: { title: "The Duke and I", publicationYear: 2000, genre: "Historical Romance" }, adaptation: { title: "Bridgerton", type: "TV Series", releaseYear: 2020, platform: "Netflix", status: "Released", imdbRating: 7.3, rtScore: 82 } },
+  { author: { name: "Sally Rooney", nationality: "Irish" }, book: { title: "Normal People", publicationYear: 2018, genre: "Literary Fiction" }, adaptation: { title: "Normal People", type: "TV Series", releaseYear: 2020, platform: "Hulu", status: "Released", imdbRating: 8.3, rtScore: 91 } },
+  { author: { name: "Celeste Ng", nationality: "American" }, book: { title: "Little Fires Everywhere", publicationYear: 2017, genre: "Literary Fiction" }, adaptation: { title: "Little Fires Everywhere", type: "Limited Series", releaseYear: 2020, platform: "Hulu", status: "Released", imdbRating: 7.7, rtScore: 79 } },
+  { author: { name: "Richard Osman", nationality: "British" }, book: { title: "The Thursday Murder Club", publicationYear: 2020, genre: "Mystery" }, adaptation: { title: "The Thursday Murder Club", type: "Film", releaseYear: 2025, platform: "Netflix", status: "In Production", imdbRating: null, rtScore: null } },
+  { author: { name: "Emily Henry", nationality: "American" }, book: { title: "People We Meet on Vacation", publicationYear: 2021, genre: "Romance" }, adaptation: { title: "People We Meet on Vacation", type: "Film", releaseYear: 2025, platform: "Netflix", status: "In Production", imdbRating: null, rtScore: null } },
+  { author: { name: "Freida McFadden", nationality: "American" }, book: { title: "The Housemaid", publicationYear: 2022, genre: "Thriller" }, adaptation: { title: "The Housemaid", type: "Film", releaseYear: 2025, platform: "Theatrical", status: "In Production", imdbRating: null, rtScore: null } },
+  { author: { name: "Stephen King", nationality: "American" }, book: { title: "The Running Man", publicationYear: 1982, genre: "Science Fiction" }, adaptation: { title: "The Running Man", type: "Film", releaseYear: 2025, platform: "Theatrical", status: "In Production", imdbRating: null, rtScore: null } },
+  { author: { name: "Kazuo Ishiguro", nationality: "British" }, book: { title: "Klara and the Sun", publicationYear: 2021, genre: "Science Fiction" }, adaptation: { title: "Klara and the Sun", type: "Film", releaseYear: 2025, platform: "Theatrical", status: "In Production", imdbRating: null, rtScore: null } },
+];
+
+export async function POST() {
+  try {
+    const results = [];
+    for (const entry of adaptationsData) {
+      const author = await prisma.author.create({ data: entry.author });
+      const book = await prisma.book.create({ data: { ...entry.book, authorId: author.id } });
+      const adaptation = await prisma.adaptation.create({ data: { ...entry.adaptation, bookId: book.id } });
+      results.push(adaptation.title);
+    }
+    return NextResponse.json({ message: `Added ${results.length} adaptations`, titles: results });
+  } catch (error) {
+    console.error("Error seeding:", error);
+    return NextResponse.json({ error: "Failed to seed" }, { status: 500 });
+  }
+}

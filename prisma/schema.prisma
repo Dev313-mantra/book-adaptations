@@ -1,0 +1,45 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+model Author {
+  id          Int      @id @default(autoincrement())
+  name        String
+  nationality String?
+  books       Book[]
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Book {
+  id              Int          @id @default(autoincrement())
+  title           String
+  publicationYear Int?
+  genre           String?
+  author          Author       @relation(fields: [authorId], references: [id])
+  authorId        Int
+  adaptations     Adaptation[]
+  createdAt       DateTime     @default(now())
+  updatedAt       DateTime     @updatedAt
+}
+
+model Adaptation {
+  id            Int      @id @default(autoincrement())
+  title         String
+  type          String   // "Film", "TV Series", "Limited Series"
+  releaseYear   Int?
+  platform      String?  // Netflix, HBO, theatrical, etc.
+  status        String   @default("Released") // "Announced", "In Production", "Released"
+  imdbRating    Float?
+  rtScore       Int?     // Rotten Tomatoes percentage
+  book          Book     @relation(fields: [bookId], references: [id])
+  bookId        Int
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}
